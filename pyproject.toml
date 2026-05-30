@@ -1,0 +1,16 @@
+[tool.semantic_release]
+version_variables = ["common/version.py:__version__"]
+branch = "main"
+changelog_file = "CHANGELOG.md"
+commit_message = "chore(release): v{version}"
+major_on_zero = false
+upload_to_pypi = false
+build_command = false
+
+[tool.semantic_release.remote]
+type = "github"
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["feat", "fix", "perf", "refactor", "ci", "docs", "chore"]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
