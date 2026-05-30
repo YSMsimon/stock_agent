@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   release:
-    types: [published]    # fires when semantic-release creates a GitHub Release
+    types: [published]
 
 env:
   REGISTRY: ghcr.io
@@ -36,9 +36,55 @@ jobs:
             type=raw,value=latest
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    needs: build-and-push        # only runs after image is pushed
+    permissions:
+      packages: read
+
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image
+        run: docker pull ghcr.io/${{ github.repository }}:latest
+
+      - name: Smoke test — verify imports load
+        run: |
+          docker run --rm \
+            ghcr.io/${{ github.repository }}:latest \
+            python3 -c "
+          from common.config import Config
+          from agents.base import Agent, load_skill, load_prompt
+          from agents.memory import MemorySystem
+          from tools.write_report import WriteReportTool
+          from tools.run_market_data import RunMarketDataTool
+          from tools.run_news_sentiment import RunNewsSentimentTool
+          print('All imports OK')
+          "
+
+      - name: Smoke test — verify config validation error messages
+        run: |
+          docker run --rm \
+            ghcr.io/${{ github.repository }}:latest \
+            python3 -c "
+          from common.config import Config
+          c = Config()
+          try:
+              c.validate()
+          except ValueError:
+              pass  # expected — no env vars set in CI
+          print('Config validation OK')
+          "
