@@ -5,7 +5,6 @@ from agents.base import Agent, load_skill
 
 
 class OrchestratorAgent(Agent):
-
     def __init__(self, config: Config) -> None:
         super().__init__(
             config=config,
@@ -26,7 +25,7 @@ class OrchestratorAgent(Agent):
         self._yfinance_client = YFinanceClient()
         await self._yfinance_client.connect()
 
-        market_data    = MarketDataAgent(self.config, self._yfinance_client)
+        market_data = MarketDataAgent(self.config, self._yfinance_client)
         news_sentiment = NewsSentimentAgent(self.config)
 
         self.tools = [
@@ -35,7 +34,6 @@ class OrchestratorAgent(Agent):
             WriteReportTool(self.config, self._yfinance_client),
         ]
         self._tool_map = {t.name: t for t in self.tools}
-
 
     async def teardown(self) -> None:
         client = getattr(self, "_yfinance_client", None)

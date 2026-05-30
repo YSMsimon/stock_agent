@@ -1,4 +1,5 @@
 """5 end-to-end tests through OrchestratorAgent → MarketDataAgent → yfinance MCP"""
+
 import asyncio
 from common.config import Config
 from agents.orchestrator import OrchestratorAgent
@@ -11,6 +12,7 @@ TESTS = [
     "How has TSLA's stock performed over the last month? Show key OHLCV data",
 ]
 
+
 async def main() -> None:
     config = Config()
     config.validate()
@@ -18,7 +20,7 @@ async def main() -> None:
     await agent.setup()
     # clear stale orchestrator memory so previous test runs don't bleed in
     agent.memory.clear()
-    print(f"Ready. {agent}\n{'═'*80}\n")
+    print(f"Ready. {agent}\n{'═' * 80}\n")
 
     try:
         for i, prompt in enumerate(TESTS, 1):
@@ -27,9 +29,10 @@ async def main() -> None:
             print("Agent> ", end="", flush=True)
             async for chunk in agent.stream_chat(prompt):
                 print(chunk, end="", flush=True)
-            print(f"\n\n{'═'*80}\n")
+            print(f"\n\n{'═' * 80}\n")
     finally:
         await agent.teardown()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

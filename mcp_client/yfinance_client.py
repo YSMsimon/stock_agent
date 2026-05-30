@@ -13,7 +13,6 @@ _SERVER_ARGS = [
 
 
 class YFinanceClient:
-
     def __init__(self) -> None:
         self._session: ClientSession | None = None
         self._exit_stack: AsyncExitStack | None = None

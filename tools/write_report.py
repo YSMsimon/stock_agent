@@ -12,7 +12,7 @@ from common.config import Config
 from tools.base import Tool
 
 REPORTS_DIR = Path("reports")
-CHARTS_DIR  = Path("reports/charts")
+CHARTS_DIR = Path("reports/charts")
 
 
 class WriteReportTool(Tool):
@@ -71,8 +71,10 @@ class WriteReportTool(Tool):
             style = mpf.make_mpf_style(
                 base_mpf_style="charles",
                 marketcolors=mpf.make_marketcolors(
-                    up="#26a69a", down="#ef5350",
-                    edge="inherit", wick="inherit",
+                    up="#26a69a",
+                    down="#ef5350",
+                    edge="inherit",
+                    wick="inherit",
                     volume={"up": "#26a69a", "down": "#ef5350"},
                 ),
                 gridstyle=":",
@@ -120,7 +122,12 @@ class WriteReportTool(Tool):
                 else:
                     lines = content.split("\n")
                     insert_at = next(
-                        (i + 1 for i, l in enumerate(lines) if l.startswith("# ")), 1
+                        (
+                            i + 1
+                            for i, line in enumerate(lines)
+                            if line.startswith("# ")
+                        ),
+                        1,
                     )
                     lines.insert(insert_at, f"\n{chart_md}\n")
                     content = "\n".join(lines)

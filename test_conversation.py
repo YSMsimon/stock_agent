@@ -2,6 +2,7 @@
 Multi-turn conversation test — simulates a real user session across many exchanges.
 Tests: memory carryover, follow-ups, topic switches, context errors, edge cases.
 """
+
 import asyncio
 from common.config import Config
 from agents.orchestrator import OrchestratorAgent
@@ -10,32 +11,24 @@ from agents.orchestrator import OrchestratorAgent
 CONVERSATION = [
     # --- warm up ---
     "Hi, what can you do?",
-
     # --- market data ---
     "What's NVDA's current price and market cap?",
-    "What about its PE ratio and 52-week high?",          # follow-up — no ticker mentioned
-
+    "What about its PE ratio and 52-week high?",  # follow-up — no ticker mentioned
     # --- topic switch ---
     "Now look at AAPL — how has it performed over the last 3 months?",
-    "Compare that to MSFT over the same period",           # follow-up compare
-
+    "Compare that to MSFT over the same period",  # follow-up compare
     # --- full analysis flow ---
     "Give me a full analysis of META",
-    "no just text",                                        # reply to the .md question
-
+    "no just text",  # reply to the .md question
     # --- follow-up on the analysis ---
-    "What was the operating margin you just mentioned?",   # memory test
-    "What are analysts saying about it?",                  # implicit ticker follow-up
-
+    "What was the operating margin you just mentioned?",  # memory test
+    "What are analysts saying about it?",  # implicit ticker follow-up
     # --- topic switch to news ---
     "Any recent news on the semiconductor sector?",
-
     # --- ambiguous / tricky ---
-    "What about the other one?",                           # completely ambiguous
-
+    "What about the other one?",  # completely ambiguous
     # --- out of scope ---
     "Can you book me a flight to New York?",
-
     # --- come back to finance ---
     "Ok back to stocks — screen for the top 5 day gainers right now",
 ]

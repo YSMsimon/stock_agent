@@ -4,6 +4,7 @@ from pathlib import Path
 
 MEMORY_DIR = ".stock_agent"
 
+
 class MemorySystem:
     def __init__(self, name: str, base_dir: str | Path = ".") -> None:
         self.name = name

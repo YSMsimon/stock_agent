@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from tools.base import Tool
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
-SKILLS_DIR  = Path(__file__).parent.parent / "skills"
+SKILLS_DIR = Path(__file__).parent.parent / "skills"
 
 
 def load_prompt(name: str) -> str:
@@ -38,7 +38,7 @@ def load_skill(name: str) -> str:
     if content.startswith("---"):
         end = content.find("---", 3)
         if end != -1:
-            content = content[end + 3:].strip()
+            content = content[end + 3 :].strip()
     return content
 
 
@@ -50,9 +50,9 @@ class Agent:
         prompt_name: str = "stock_agent",
         tools: Optional[list[Tool]] = None,
     ) -> None:
-        self.name      = name
-        self.config    = config
-        self.tools     = tools or []
+        self.name = name
+        self.config = config
+        self.tools = tools or []
         self._tool_map = {t.name: t for t in self.tools}
 
         self.system_prompt: str = load_prompt(prompt_name)
@@ -77,9 +77,9 @@ class Agent:
             result = f"Error: tool '{tool_name}' not found."
 
         return {
-            "role":         "tool",
+            "role": "tool",
             "tool_call_id": tool_call.id,
-            "content":      result,
+            "content": result,
         }
 
     _MAX_TOOL_ITERATIONS = 10
@@ -102,21 +102,23 @@ class Agent:
             if choice.finish_reason != "tool_calls" or "<｜｜DSML｜｜" in content:
                 return messages
 
-            messages.append({
-                "role":    "assistant",
-                "content": content,
-                "tool_calls": [
-                    {
-                        "id":   tc.id,
-                        "type": tc.type,
-                        "function": {
-                            "name":      tc.function.name,
-                            "arguments": tc.function.arguments,
-                        },
-                    }
-                    for tc in choice.message.tool_calls
-                ],
-            })
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": content,
+                    "tool_calls": [
+                        {
+                            "id": tc.id,
+                            "type": tc.type,
+                            "function": {
+                                "name": tc.function.name,
+                                "arguments": tc.function.arguments,
+                            },
+                        }
+                        for tc in choice.message.tool_calls
+                    ],
+                }
+            )
 
             results = await asyncio.gather(
                 *[self._execute_tool_call(tc) for tc in choice.message.tool_calls]

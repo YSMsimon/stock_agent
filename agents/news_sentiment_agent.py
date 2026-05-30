@@ -7,7 +7,6 @@ from tools.web_fetch import WebFetchTool
 
 
 class NewsSentimentAgent(Agent):
-
     def __init__(self, config: Config) -> None:
         super().__init__(
             config=config,

@@ -3,6 +3,7 @@ from tavily import AsyncTavilyClient
 from common.config import Config
 from tools.base import Tool
 
+
 class WebSearchTool(Tool):
     name = "web_search"
     description = (
@@ -29,7 +30,7 @@ class WebSearchTool(Tool):
                             "type": "string",
                             "description": (
                                 "The search query. Use search operators for precision: "
-                                "site:reddit.com, after:YYYY-MM-DD, \"exact phrase\", OR, -site:."
+                                'site:reddit.com, after:YYYY-MM-DD, "exact phrase", OR, -site:.'
                             ),
                         },
                         "max_results": {
@@ -50,7 +51,7 @@ class WebSearchTool(Tool):
                             "items": {"type": "string"},
                             "description": (
                                 "Restrict results to these domains only. "
-                                "Example: [\"reddit.com\", \"x.com\"]"
+                                'Example: ["reddit.com", "x.com"]'
                             ),
                         },
                         "exclude_domains": {
@@ -80,7 +81,9 @@ class WebSearchTool(Tool):
         exclude_domains: list[str] = kwargs.get("exclude_domains", [])
         days: int = int(kwargs.get("days", 30))
 
-        print(f"\n[web_search] query={query!r}  depth={search_depth}  days={days}  max={max_results}")
+        print(
+            f"\n[web_search] query={query!r}  depth={search_depth}  days={days}  max={max_results}"
+        )
 
         response = await self.client.search(
             query=query,
