@@ -1061,7 +1061,7 @@ async function send(text) {
   scrollBottom();
 
   // Build AI row — local DOM refs, never getElementById
-  const aiRow      = el('div', 'msg-row');
+  const aiRow      = el('div', 'msg-row msg-ai');
   const aiHead     = el('div', 'msg-ai-head');
   aiHead.innerHTML = `
     <div class="ai-avatar"><i data-lucide="trending-up" style="width:13px;height:13px"></i></div>
