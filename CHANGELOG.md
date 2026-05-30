@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.4.2 (2026-05-30)
+
+### Bug Fixes
+
+- Safe lucide calls, finally block prevents stuck isStreaming, abort/stop generation
+  ([#14](https://github.com/YSMsimon/stock_agent/pull/14),
+  [`31d0502`](https://github.com/YSMsimon/stock_agent/commit/31d05028efbf44813a01571effd5449895dde085))
+
+
 ## v1.4.1 (2026-05-30)
 
 ### Bug Fixes
