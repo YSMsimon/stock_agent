@@ -80,7 +80,7 @@ jobs:
           review = response.choices[0].message.content
 
           # post as PR comment via gh
-          comment = f"## 🤖 DeepSeek AI Review\n\n{review}\n\n---\n*Automated review by DeepSeek. Not a substitute for human review.*"
+          comment = f'<img src="https://avatars.githubusercontent.com/u/148124770" width="20"/> **DeepSeek AI Review**\n\n{review}\n\n---\n*Automated review by DeepSeek. Not a substitute for human review.*'
           subprocess.run(
               ["gh", "pr", "comment", os.environ["PR_NUMBER"],
                "--repo", os.environ["REPO"],
