@@ -2,6 +2,29 @@
 
 <!-- version list -->
 
+## v1.2.1 (2026-05-30)
+
+### Bug Fixes
+
+- Add permissions to security workflow and expand commitlint types
+  ([#10](https://github.com/YSMsimon/stock_agent/pull/10),
+  [`8ef3515`](https://github.com/YSMsimon/stock_agent/commit/8ef3515f3a939a9cb12703a169008c6cfd9a8d7f))
+
+- Replace dependency-review-action with pip-audit for Python support
+  ([#10](https://github.com/YSMsimon/stock_agent/pull/10),
+  [`8ef3515`](https://github.com/YSMsimon/stock_agent/commit/8ef3515f3a939a9cb12703a169008c6cfd9a8d7f))
+
+### Continuous Integration
+
+- Add commitlint, security scan, and dependency review
+  ([#10](https://github.com/YSMsimon/stock_agent/pull/10),
+  [`8ef3515`](https://github.com/YSMsimon/stock_agent/commit/8ef3515f3a939a9cb12703a169008c6cfd9a8d7f))
+
+- Add commitlint, security scan, dependency review, fix ai-review logo
+  ([#10](https://github.com/YSMsimon/stock_agent/pull/10),
+  [`8ef3515`](https://github.com/YSMsimon/stock_agent/commit/8ef3515f3a939a9cb12703a169008c6cfd9a8d7f))
+
+
 ## v1.2.0 (2026-05-30)
 
 ### Bug Fixes
