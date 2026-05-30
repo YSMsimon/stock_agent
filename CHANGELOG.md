@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v1.4.0 (2026-05-30)
+
+### Bug Fixes
+
+- Remove duplicate patch, fix error ordering, validate switch messages, remove invalid CSS
+  ([#12](https://github.com/YSMsimon/stock_agent/pull/12),
+  [`047ae3c`](https://github.com/YSMsimon/stock_agent/commit/047ae3cee53d770bff39cba25bf7a1a930521e58))
+
+### Features
+
+- White theme, multi-conversation, pin/delete, tool progress
+  ([#12](https://github.com/YSMsimon/stock_agent/pull/12),
+  [`047ae3c`](https://github.com/YSMsimon/stock_agent/commit/047ae3cee53d770bff39cba25bf7a1a930521e58))
+
+- White theme, multi-conversation, pin/delete, tool progress UI
+  ([#12](https://github.com/YSMsimon/stock_agent/pull/12),
+  [`047ae3c`](https://github.com/YSMsimon/stock_agent/commit/047ae3cee53d770bff39cba25bf7a1a930521e58))
+
+
 ## v1.3.0 (2026-05-30)
 
 ### Bug Fixes
