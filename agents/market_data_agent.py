@@ -3,6 +3,7 @@ from __future__ import annotations
 from common.config import Config
 from agents.base import Agent
 from mcp_client.yfinance_client import YFinanceClient
+from tools.base import Tool
 from tools.mcp_tool import MCPTool
 
 _TOOL_NAMES = {
@@ -27,7 +28,7 @@ _TOOL_NAMES = {
 
 class MarketDataAgent(Agent):
     def __init__(self, config: Config, client: YFinanceClient) -> None:
-        tools = [
+        tools: list[Tool] = [
             MCPTool(config, t, client) for t in client.tools if t.name in _TOOL_NAMES
         ]
         super().__init__(

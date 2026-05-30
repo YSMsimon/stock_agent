@@ -38,7 +38,7 @@ class RunNewsSentimentTool(Tool):
             },
         }
 
-    async def run(self, query: str) -> str:
+    async def run(self, query: str) -> str:  # type: ignore[override]
         print(f"\n[run_news_sentiment] {query!r}")
         self._agent.memory.clear()
         chunks: list[str] = []

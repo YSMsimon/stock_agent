@@ -105,7 +105,7 @@ class WriteReportTool(Tool):
             print(f"[write_report] chart skipped: {e}")
             return None
 
-    async def run(self, ticker: str, content: str) -> str:
+    async def run(self, ticker: str, content: str) -> str:  # type: ignore[override]
         REPORTS_DIR.mkdir(exist_ok=True)
         slug = re.sub(r"[^A-Z0-9]", "", ticker.upper())
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
