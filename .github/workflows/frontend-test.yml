@@ -1,0 +1,39 @@
+name: Frontend Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install yfinance-mcp pytest-asyncio
+          python -m playwright install chromium --with-deps
+
+      - name: Run frontend tests
+        env:
+          MODEL: test-model
+          LLM_API_KEY: test-key
+          LLM_URL: https://api.test.invalid
+          TAVILY_API_KEY: test-tavily
+        run: pytest tests/frontend/ -v
