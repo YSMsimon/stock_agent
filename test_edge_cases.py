@@ -2,6 +2,7 @@
 5 edge-case + adversarial tests through the full orchestrator stack.
 Tests: report format gating, out-of-scope, prompt injection x2, query-embedded injection.
 """
+
 import asyncio
 from common.config import Config
 from agents.orchestrator import OrchestratorAgent
@@ -12,14 +13,14 @@ TESTS = [
         "1 — Full analysis + user says YES to .md",
         [
             "Give me a full analysis of AAPL",
-            "yes save it as a file",          # simulated reply to the format question
+            "yes save it as a file",  # simulated reply to the format question
         ],
     ),
     (
         "2 — Full analysis + user says NO to .md",
         [
             "Full research report on GOOGL",
-            "no just give me the text",        # simulated reply
+            "no just give me the text",  # simulated reply
         ],
     ),
     (

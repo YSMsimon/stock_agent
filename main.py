@@ -26,16 +26,20 @@ async def main() -> None:
                 messages = agent.memory.messages
                 keep = 10
                 if len(messages) <= keep:
-                    print(f"Agent> Nothing to compact — only {len(messages)} messages in history.\n")
+                    print(
+                        f"Agent> Nothing to compact — only {len(messages)} messages in history.\n"
+                    )
                     continue
                 to_compact = messages[:-keep]
-                to_keep    = messages[-keep:]
+                to_keep = messages[-keep:]
                 summary = await compactor.compact(to_compact)
                 agent.memory.clear()
                 agent.memory.add_message("assistant", f"[Compacted context]\n{summary}")
                 for msg in to_keep:
                     agent.memory.add_message(msg["role"], msg.get("content") or "")
-                print(f"Agent> Done. {len(to_compact)} messages → 1 summary + {len(to_keep)} kept.\n")
+                print(
+                    f"Agent> Done. {len(to_compact)} messages → 1 summary + {len(to_keep)} kept.\n"
+                )
                 continue
 
             print("Agent> ", end="", flush=True)

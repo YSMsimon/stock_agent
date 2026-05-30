@@ -6,12 +6,14 @@ from tools.base import Tool
 
 
 class MCPTool(Tool):
-
     def __init__(self, config: Config, tool_def, client: YFinanceClient) -> None:
         super().__init__(config)
         self.name = tool_def.name
         self._description = tool_def.description or ""
-        self._input_schema = tool_def.inputSchema or {"type": "object", "properties": {}}
+        self._input_schema = tool_def.inputSchema or {
+            "type": "object",
+            "properties": {},
+        }
         self._client = client
 
     def schema(self) -> dict:
