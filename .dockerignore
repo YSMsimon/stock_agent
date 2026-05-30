@@ -1,0 +1,7 @@
+.env
+.stock_agent/
+reports/
+.git/
+__pycache__/
+*.pyc
+.pytest_cache/
