@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 from common.config import Config
 
 
@@ -15,7 +16,7 @@ class Tool(ABC):
         ...
 
     @abstractmethod
-    async def run(self, **kwargs) -> str:
+    async def run(self, **kwargs: Any) -> str:
         """Execute the tool and return a string result."""
         ...
 

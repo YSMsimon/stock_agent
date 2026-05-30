@@ -88,7 +88,7 @@ class Agent:
         tool_schemas = [t.schema() for t in self.tools]
 
         for _ in range(self._MAX_TOOL_ITERATIONS):
-            response = await self.client.chat.completions.create(
+            response = await self.client.chat.completions.create(  # type: ignore[call-overload]
                 model=self.config.model,
                 messages=messages,
                 tools=tool_schemas,
@@ -140,13 +140,13 @@ class Agent:
 
         stream = await self.client.chat.completions.create(
             model=self.config.model,
-            messages=messages,
+            messages=messages,  # type: ignore[arg-type]
             stream=True,
             extra_body={"thinking": {"type": "disabled"}},
         )
 
         chunks: list[str] = []
-        async for event in stream:
+        async for event in stream:  # type: ignore[union-attr]
             delta = event.choices[0].delta
             if delta.content:
                 chunks.append(delta.content)
