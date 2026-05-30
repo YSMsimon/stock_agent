@@ -86,3 +86,46 @@ Reports are saved to `reports/{TICKER}_{timestamp}.md`. Charts are saved to `rep
 ### Context compaction
 
 `/compact` in the CLI uses `CompactorAgent` (driven by `prompts/compactor.md`) to summarise old messages. It keeps the last 10 messages verbatim and replaces everything older with a single summary message.
+
+## CI/CD
+
+Workflows in `.github/workflows/`:
+
+| File | Trigger | What it does |
+|------|---------|-------------|
+| `lint.yml` | push / PR | ruff lint + format check |
+| `typecheck.yml` | push / PR | mypy static type check |
+| `test.yml` | push / PR | pytest 21 unit tests |
+| `ai-review.yml` | PR opened / updated | DeepSeek posts review comment |
+| `release.yml` | push to main | semantic-release: bumps version, writes CHANGELOG, creates GitHub Release |
+| `deploy.yml` | GitHub Release published | builds + pushes Docker image to ghcr.io, runs smoke test |
+
+Commit message format (required for semantic-release):
+- `fix: ...` → patch bump
+- `feat: ...` → minor bump
+- `feat!: ...` → major bump
+- `ci/chore/docs: ...` → no release
+
+Branch protection on `main`: lint + typecheck + test must pass. Repo admin can bypass with `gh pr merge --squash --admin`.
+
+## Agentic PR Loop
+
+When asked to make a change with **"full loop"** or **"open a PR"**, follow this procedure autonomously without stopping:
+
+```
+1. git checkout main && git pull origin main
+2. git checkout -b <branch-name>
+3. make the change
+4. git add + git commit -m "feat/fix/ci: description"
+5. git push origin <branch-name>
+6. gh pr create --title "..." --body "..." --base main --head <branch-name>
+7. gh pr checks <pr-number> --watch          ← stream until all done
+8. if any fail → gh run view <run-id> --log  ← read error, fix, push, go to 7
+9. gh pr view <pr-number> --comments         ← read DeepSeek review
+10. apply valid suggestions → push → go to 7
+11. gh pr merge <pr-number> --squash --admin  ← merge using admin bypass
+```
+
+**Example trigger:** "add X, full loop"
+**Branch naming:** `feat/add-portfolio-tool`, `fix/chart-path`, `ci/add-caching`
+**Skip suggestions that are:** overkill, overly complex, or contradict existing architecture.
