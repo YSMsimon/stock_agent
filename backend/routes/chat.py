@@ -3,9 +3,6 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import types
-from typing import Any
-
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
@@ -43,8 +40,13 @@ class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=4000)
 
 
+class SwitchMessage(BaseModel):
+    role: str = Field(..., pattern="^(user|assistant)$")
+    content: str = Field(default="")
+
+
 class SwitchRequest(BaseModel):
-    messages: list[dict[str, Any]] = Field(default_factory=list)
+    messages: list[SwitchMessage] = Field(default_factory=list)
 
 
 def _tool_label(name: str) -> str:
@@ -74,9 +76,6 @@ async def chat(request: ChatRequest):
         await progress_queue.put({"type": "tool_end", "tool": name})
         return result
 
-    agent._execute_tool_call = types.MethodType(
-        lambda self, tc: patched_execute(tc), agent
-    )
     agent._execute_tool_call = patched_execute
 
     async def generate():
@@ -109,6 +108,7 @@ async def chat(request: ChatRequest):
 
         if stream_exc:
             yield f"data: {json.dumps({'type': 'error', 'content': str(stream_exc)})}\n\n"
+            return
 
         yield "data: [DONE]\n\n"
 
@@ -125,10 +125,8 @@ async def switch_conversation(request: SwitchRequest):
     agent = get_agent()
     agent.memory.clear()
     for msg in request.messages:
-        role = msg.get("role", "")
-        content = msg.get("content", "")
-        if role in ("user", "assistant") and content:
-            agent.memory.add_message(role, content)
+        if msg.content:
+            agent.memory.add_message(msg.role, msg.content)
     return {"status": "ok", "loaded": len(request.messages)}
 
 
