@@ -1,0 +1,91 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install openai
+
+      - name: Run DeepSeek PR Review
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'EOF'
+          import os
+          import subprocess
+          from openai import OpenAI
+
+          # get the PR diff
+          diff = subprocess.check_output(
+              ["git", "diff", os.environ["BASE_SHA"], os.environ["HEAD_SHA"]],
+              text=True,
+          )
+
+          if not diff.strip():
+              print("No diff found, skipping review.")
+              exit(0)
+
+          # truncate if too large (DeepSeek context limit)
+          if len(diff) > 12000:
+              diff = diff[:12000] + "\n\n... [diff truncated] ..."
+
+          client = OpenAI(
+              api_key=os.environ["DEEPSEEK_API_KEY"],
+              base_url="https://api.deepseek.com",
+          )
+
+          response = client.chat.completions.create(
+              model="deepseek-chat",
+              messages=[
+                  {
+                      "role": "system",
+                      "content": (
+                          "You are a senior software engineer reviewing a pull request. "
+                          "Review the diff for: bugs, security issues, logic errors, "
+                          "missing edge cases, and clear improvements. "
+                          "Be concise and specific. Reference exact file and line numbers. "
+                          "Format your review in markdown with sections: "
+                          "**Summary**, **Issues** (if any), **Suggestions**, **Verdict** (Approve / Request Changes)."
+                      ),
+                  },
+                  {
+                      "role": "user",
+                      "content": f"Review this PR diff:\n\n```diff\n{diff}\n```",
+                  },
+              ],
+          )
+
+          review = response.choices[0].message.content
+
+          # post as PR comment via gh
+          comment = f"## 🤖 DeepSeek AI Review\n\n{review}\n\n---\n*Automated review by DeepSeek. Not a substitute for human review.*"
+          subprocess.run(
+              ["gh", "pr", "comment", os.environ["PR_NUMBER"],
+               "--repo", os.environ["REPO"],
+               "--body", comment],
+              check=True,
+          )
+          print("Review posted successfully.")
+          EOF
