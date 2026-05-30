@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.3.0 (2026-05-30)
+
+### Bug Fixes
+
+- Add DOMPurify XSS protection, error logging, input max_length
+  ([#11](https://github.com/YSMsimon/stock_agent/pull/11),
+  [`c33724b`](https://github.com/YSMsimon/stock_agent/commit/c33724bd55e303de423d6f6fa70b64ca10bc4cb3))
+
+### Features
+
+- Add FastAPI backend and chat UI frontend ([#11](https://github.com/YSMsimon/stock_agent/pull/11),
+  [`c33724b`](https://github.com/YSMsimon/stock_agent/commit/c33724bd55e303de423d6f6fa70b64ca10bc4cb3))
+
+
 ## v1.2.1 (2026-05-30)
 
 ### Bug Fixes
