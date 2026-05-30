@@ -592,6 +592,27 @@
     .send-btn:active { transform: scale(0.92); }
     .send-btn:disabled { opacity: 0.22; cursor: not-allowed; }
 
+    .stop-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1.5px solid #fca5a5;
+      color: var(--red);
+      font-size: 12px;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.12s;
+      margin-bottom: 1px;
+      flex-shrink: 0;
+    }
+
+    .stop-btn:hover { background: #fef2f2; }
+    .stop-btn.visible { display: flex; }
+
     .hint {
       font-size: 11px;
       color: #ccc;
@@ -680,6 +701,9 @@
     <div class="input-box">
       <textarea id="input" placeholder="Ask about any stock..." rows="1"
         onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="stop-btn" id="stopBtn" onclick="stopGeneration()">
+        <i data-lucide="square" style="width:12px;height:12px"></i> Stop
+      </button>
       <button class="send-btn" id="sendBtn" onclick="sendFromInput()" title="Send (Enter)">
         <i data-lucide="send" style="width:15px;height:15px"></i>
       </button>
@@ -705,6 +729,12 @@
 // ══════════════════════════════════
 const API = '';
 let isStreaming = false;
+let abortCtrl   = null;
+
+// Safe wrapper — lucide may not be loaded if CDN is slow
+function safeIcons() {
+  try { safeIcons(); } catch (_) {}
+}
 
 let convs  = JSON.parse(localStorage.getItem('sa_convs')  || '[]');
 let active = localStorage.getItem('sa_active') || null;
@@ -731,7 +761,7 @@ function current() { return convs.find(c => c.id === active); }
 // BOOT
 // ══════════════════════════════════
 window.addEventListener('load', () => {
-  lucide.createIcons();
+  safeIcons();
   ping();
   renderSidebar();
   renderChat();
@@ -835,7 +865,7 @@ async function newChat() {
   await fetch(`${API}/api/clear`, { method: 'POST' });
   renderSidebar();
   renderChat();
-  lucide.createIcons();
+  safeIcons();
   document.getElementById('input').focus();
 }
 
@@ -853,12 +883,12 @@ async function switchConv(id) {
   } catch {}
   renderSidebar();
   renderChat();
-  lucide.createIcons();
+  safeIcons();
 }
 
 function togglePin(id) {
   const c = convs.find(x => x.id === id);
-  if (c) { c.pinned = !c.pinned; save(); renderSidebar(); lucide.createIcons(); }
+  if (c) { c.pinned = !c.pinned; save(); renderSidebar(); safeIcons(); }
 }
 
 function askDelete(id) {
@@ -881,7 +911,7 @@ async function doDelete(id) {
   save();
   renderSidebar();
   renderChat();
-  lucide.createIcons();
+  safeIcons();
 }
 
 // ══════════════════════════════════
@@ -962,9 +992,9 @@ function addCopyBtns(container) {
         setTimeout(() => {
           btn.classList.remove('copied');
           btn.innerHTML = `<i data-lucide="copy" style="width:11px;height:11px"></i> Copy`;
-          lucide.createIcons();
+          safeIcons();
         }, 1800);
-        lucide.createIcons();
+        safeIcons();
       });
     };
     wrap.appendChild(btn);
@@ -1000,10 +1030,16 @@ function sendFromInput() {
   if (text) { inp.value = ''; autoResize(inp); send(text); }
 }
 
+function stopGeneration() {
+  if (abortCtrl) abortCtrl.abort();
+}
+
 async function send(text) {
   if (!text || isStreaming) return;
   isStreaming = true;
+  abortCtrl   = new AbortController();
   setSend(false);
+  setStop(true);
 
   document.querySelector('.empty-state')?.remove();
 
@@ -1015,7 +1051,7 @@ async function send(text) {
   if (conv.title === 'New conversation') {
     conv.title = text.slice(0, 50) + (text.length > 50 ? '…' : '');
     renderSidebar();
-    lucide.createIcons();
+    safeIcons();
     document.getElementById('topbarName').textContent = conv.title;
   }
   save();
@@ -1024,14 +1060,13 @@ async function send(text) {
   msgBox.appendChild(msgEl('user', text, now));
   scrollBottom();
 
-  // Build AI row — store direct DOM references (NOT getElementById)
+  // Build AI row — local DOM refs, never getElementById
   const aiRow      = el('div', 'msg-row');
   const aiHead     = el('div', 'msg-ai-head');
   aiHead.innerHTML = `
     <div class="ai-avatar"><i data-lucide="trending-up" style="width:13px;height:13px"></i></div>
     <span class="ai-name">Stock Agent</span>`;
 
-  // ↓ These are local variables pointing to the NEW elements — never use getElementById
   const progressWrap = el('div', 'tool-progress-wrap');
   const aiBody       = el('div', 'msg-body');
   const mdContent    = el('div', 'md-content');
@@ -1041,18 +1076,20 @@ async function send(text) {
   aiRow.appendChild(progressWrap);
   aiRow.appendChild(aiBody);
   msgBox.appendChild(aiRow);
-  lucide.createIcons();
+  safeIcons();
   scrollBottom();
 
-  const toolRows = {};   // tool → row element
+  const toolRows = {};
   let fullText   = '';
   let firstChunk = true;
+  let stopped    = false;
 
   try {
     const res = await fetch(`${API}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text }),
+      signal: abortCtrl.signal,
     });
 
     const reader  = res.body.getReader();
@@ -1093,7 +1130,7 @@ async function send(text) {
               row.classList.add('done');
               row.querySelector('.tool-spinner-wrap').innerHTML =
                 `<i data-lucide="check" class="t-check" style="width:13px;height:13px"></i>`;
-              lucide.createIcons();
+              safeIcons();
             }
           }
 
@@ -1126,35 +1163,45 @@ async function send(text) {
       }
     }
   } catch (e) {
-    mdContent.innerHTML = `<span style="color:var(--red)">Connection error: ${escHtml(e.message)}</span>`;
+    if (e.name === 'AbortError') {
+      stopped = true;
+      if (fullText) mdContent.innerHTML = renderMd(fullText) + '<span style="color:var(--muted);font-size:12px"> *(stopped)*</span>';
+      else mdContent.innerHTML = `<span style="color:var(--muted);font-size:12px">Generation stopped.</span>`;
+    } else {
+      mdContent.innerHTML = `<span style="color:var(--red)">Connection error: ${escHtml(e.message)}</span>`;
+    }
+  } finally {
+    // Always runs — prevents isStreaming getting stuck
+    mdContent.querySelector('.cursor')?.remove();
+    progressWrap.style.display = 'none';
+    addCopyBtns(mdContent);
+    mdContent.querySelectorAll('pre code').forEach(e => hljs.highlightElement(e));
+    safeIcons();
+
+    if (fullText) {
+      conv.msgs.push({ role: 'assistant', content: fullText, ts: Date.now() });
+      save();
+    }
+
+    abortCtrl   = null;
+    isStreaming  = false;
+    setSend(true);
+    setStop(false);
+    renderSidebar();
+    safeIcons();
+    document.getElementById('input').focus();
+    scrollBottom();
   }
-
-  // Cleanup cursor + code copy buttons
-  mdContent.querySelector('.cursor')?.remove();
-  progressWrap.style.display = 'none';
-  addCopyBtns(mdContent);
-  mdContent.querySelectorAll('pre code').forEach(e => hljs.highlightElement(e));
-  lucide.createIcons();
-
-  if (fullText) {
-    conv.msgs.push({ role: 'assistant', content: fullText, ts: Date.now() });
-    save();
-  }
-
-  // Update new-btn guard
-  renderSidebar();
-  lucide.createIcons();
-
-  isStreaming = false;
-  setSend(true);
-  document.getElementById('input').focus();
-  scrollBottom();
 }
 
 // ══════════════════════════════════
 // HELPERS
 // ══════════════════════════════════
 function setSend(on) { document.getElementById('sendBtn').disabled = !on; }
+function setStop(on) {
+  const b = document.getElementById('stopBtn');
+  if (on) b.classList.add('visible'); else b.classList.remove('visible');
+}
 
 function autoResize(el) {
   el.style.height = 'auto';
