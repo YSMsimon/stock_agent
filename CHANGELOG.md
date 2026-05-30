@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v1.4.3 (2026-05-30)
+
+### Bug Fixes
+
+- Exclude frontend tests from test.yml to avoid missing browser install
+  ([#15](https://github.com/YSMsimon/stock_agent/pull/15),
+  [`702387b`](https://github.com/YSMsimon/stock_agent/commit/702387b9cf3ced3b394ac28d1d67eef305e57b1c))
+
+### Continuous Integration
+
+- Add Playwright frontend tests and frontend-test workflow
+  ([#15](https://github.com/YSMsimon/stock_agent/pull/15),
+  [`702387b`](https://github.com/YSMsimon/stock_agent/commit/702387b9cf3ced3b394ac28d1d67eef305e57b1c))
+
+- Add Playwright frontend tests — layout, conversations, send flow, dialogs
+  ([#15](https://github.com/YSMsimon/stock_agent/pull/15),
+  [`702387b`](https://github.com/YSMsimon/stock_agent/commit/702387b9cf3ced3b394ac28d1d67eef305e57b1c))
+
+
 ## v1.4.2 (2026-05-30)
 
 ### Bug Fixes
