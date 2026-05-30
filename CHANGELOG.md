@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.4.1 (2026-05-30)
+
+### Bug Fixes
+
+- Unique DOM refs for tool progress, empty conv guard, Lucide icons, copy button, timestamps
+  ([#13](https://github.com/YSMsimon/stock_agent/pull/13),
+  [`9071359`](https://github.com/YSMsimon/stock_agent/commit/90713598dc9b9287f62bdc2c5a1b19b2a66d5bd4))
+
+
 ## v1.4.0 (2026-05-30)
 
 ### Bug Fixes
