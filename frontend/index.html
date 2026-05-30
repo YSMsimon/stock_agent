@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stock Agent</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -645,7 +646,7 @@
                 started = true;
               }
               fullText += content;
-              contentEl.innerHTML = marked.parse(fullText);
+              contentEl.innerHTML = DOMPurify.sanitize(marked.parse(fullText));
               contentEl.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
               const cursor = document.createElement('span');
               cursor.className = 'cursor';
@@ -683,7 +684,7 @@
       <div class="avatar ${role === 'ai' ? 'ai' : 'user'}">${role === 'ai' ? '📈' : 'Y'}</div>
       <div class="message-body">
         <div class="message-role">${role === 'ai' ? 'Stock Agent' : 'You'}</div>
-        <div class="message-content">${text ? marked.parse(text) : ''}</div>
+        <div class="message-content">${text ? DOMPurify.sanitize(marked.parse(text)) : ''}</div>
       </div>
     `;
     messages.appendChild(div);
