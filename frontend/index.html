@@ -1019,6 +1019,7 @@ function addCopyBtns(container) {
 }
 
 function fmtResult(text) {
+  if (!text) return '';
   try { return JSON.stringify(JSON.parse(text), null, 2); } catch { return text; }
 }
 
