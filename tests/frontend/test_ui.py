@@ -93,10 +93,13 @@ class TestLayout:
         expect(page.locator("#input")).to_be_visible()
 
     def test_send_button_present(self, page: Page):
-        expect(page.locator("#sendBtn")).to_be_visible()
+        expect(page.locator("#actionBtn")).to_be_visible()
 
-    def test_stop_button_hidden_by_default(self, page: Page):
-        expect(page.locator("#stopBtn")).not_to_be_visible()
+    def test_action_button_is_send_by_default(self, page: Page):
+        """Single action button visible, not in stop-mode when idle."""
+        btn = page.locator("#actionBtn")
+        expect(btn).to_be_visible()
+        expect(btn).to_be_enabled()
 
     def test_empty_state_shown_on_load(self, page: Page):
         expect(page.locator(".empty-state")).to_be_visible()
@@ -149,7 +152,7 @@ class TestInput:
         expect(page.locator("#input")).to_have_value("test message")
 
     def test_send_button_enabled(self, page: Page):
-        expect(page.locator("#sendBtn")).to_be_enabled()
+        expect(page.locator("#actionBtn")).to_be_enabled()
 
     def test_enter_clears_input(self, page: Page):
         """Pressing Enter on a non-empty input clears it (send attempted)."""
@@ -172,7 +175,7 @@ class TestInput:
     def test_empty_input_does_not_send(self, page: Page):
         """Clicking send with empty input doesn't add messages."""
         before = page.locator(".msg-row").count()
-        page.locator("#sendBtn").click()
+        page.locator("#actionBtn").click()
         time.sleep(0.1)
         assert page.locator(".msg-row").count() == before
 
@@ -204,7 +207,7 @@ class TestSendFlow:
         expect(page.locator(".msg-row.msg-ai").first).to_be_attached()
 
         # 5. Stop button is in DOM (may briefly be visible)
-        expect(page.locator("#stopBtn")).to_be_attached()
+        expect(page.locator("#actionBtn")).to_be_attached()
 
         # 6. Conversation title updated in sidebar
         title = page.locator(".conv-name").first.text_content()
@@ -219,7 +222,7 @@ class TestSendFlow:
         expect(page.locator("#newBtn")).to_be_enabled()
 
         # 9. Send button re-enabled after error
-        expect(page.locator("#sendBtn")).to_be_enabled()
+        expect(page.locator("#actionBtn")).to_be_enabled()
 
 
 # ── DELETE DIALOG TESTS ──────────────────────────────────────────
