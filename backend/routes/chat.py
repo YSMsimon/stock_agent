@@ -73,7 +73,9 @@ async def chat(request: ChatRequest):
             {"type": "tool_start", "tool": name, "label": label, "query": query}
         )
         result = await original_execute(tool_call)
-        await progress_queue.put({"type": "tool_end", "tool": name})
+        # Truncate large results before sending over SSE
+        preview = result if len(result) <= 2000 else result[:2000] + "\n…[truncated]"
+        await progress_queue.put({"type": "tool_end", "tool": name, "result": preview})
         return result
 
     agent._execute_tool_call = patched_execute
@@ -104,7 +106,15 @@ async def chat(request: ChatRequest):
                 yield f"data: {json.dumps(item)}\n\n"
         finally:
             agent._execute_tool_call = original_execute
-            await task
+            # If the client disconnected (stop button / browser close) the
+            # generator is closed early — cancel the stream task so the agent
+            # stops generating instead of running to completion in the background.
+            if not task.done():
+                task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
         if stream_exc:
             yield f"data: {json.dumps({'type': 'error', 'content': str(stream_exc)})}\n\n"

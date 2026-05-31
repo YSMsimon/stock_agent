@@ -417,14 +417,54 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 0;
+      padding: 5px 7px;
+      border-radius: 6px;
       font-size: 12.5px;
       color: var(--muted);
       animation: fadeUp 0.15s ease;
+      transition: background 0.1s;
     }
 
     .tool-row.running { color: var(--accent); }
-    .tool-row.done { opacity: 0.45; }
+    .tool-row.done { opacity: 0.7; cursor: pointer; }
+    .tool-row.done:hover { background: var(--hover); opacity: 1; }
+
+    .tool-chevron {
+      margin-left: auto;
+      color: var(--muted);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+
+    .tool-result {
+      margin: 0 0 6px 21px;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.25s ease;
+    }
+
+    .tool-result.open { max-height: 260px; }
+
+    .tool-result-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: auto;
+      max-height: 240px;
+    }
+
+    .tool-result-inner pre {
+      margin: 0;
+      padding: 10px 12px;
+      font-size: 11px;
+      font-family: 'SF Mono','Fira Code',monospace;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #555;
+    }
 
     .tool-spinner-wrap {
       width: 14px;
@@ -591,27 +631,7 @@
     .send-btn:hover { opacity: 0.87; }
     .send-btn:active { transform: scale(0.92); }
     .send-btn:disabled { opacity: 0.22; cursor: not-allowed; }
-
-    .stop-btn {
-      display: none;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      background: var(--bg);
-      border: 1.5px solid #fca5a5;
-      color: var(--red);
-      font-size: 12px;
-      font-family: inherit;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.12s;
-      margin-bottom: 1px;
-      flex-shrink: 0;
-    }
-
-    .stop-btn:hover { background: #fef2f2; }
-    .stop-btn.visible { display: flex; }
+    .send-btn.stop-mode { background: #ef4444; }
 
     .hint {
       font-size: 11px;
@@ -701,10 +721,7 @@
     <div class="input-box">
       <textarea id="input" placeholder="Ask about any stock..." rows="1"
         onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-      <button class="stop-btn" id="stopBtn" onclick="stopGeneration()">
-        <i data-lucide="square" style="width:12px;height:12px"></i> Stop
-      </button>
-      <button class="send-btn" id="sendBtn" onclick="sendFromInput()" title="Send (Enter)">
+      <button class="send-btn" id="actionBtn" onclick="handleAction()" title="Send (Enter)">
         <i data-lucide="send" style="width:15px;height:15px"></i>
       </button>
     </div>
@@ -1001,6 +1018,11 @@ function addCopyBtns(container) {
   });
 }
 
+function fmtResult(text) {
+  if (!text) return '';
+  try { return JSON.stringify(JSON.parse(text), null, 2); } catch { return text; }
+}
+
 function renderMd(text) {
   return DOMPurify.sanitize(marked.parse(text || ''));
 }
@@ -1028,6 +1050,10 @@ function sendFromInput() {
   const inp = document.getElementById('input');
   const text = inp.value.trim();
   if (text) { inp.value = ''; autoResize(inp); send(text); }
+}
+
+function handleAction() {
+  if (isStreaming) stopGeneration(); else sendFromInput();
 }
 
 function stopGeneration() {
@@ -1130,7 +1156,30 @@ async function send(text) {
               row.classList.add('done');
               row.querySelector('.tool-spinner-wrap').innerHTML =
                 `<i data-lucide="check" class="t-check" style="width:13px;height:13px"></i>`;
+
+              // Add chevron toggle
+              const chevron = el('span', 'tool-chevron');
+              chevron.innerHTML = `<i data-lucide="chevron-down" style="width:12px;height:12px"></i>`;
+              row.appendChild(chevron);
+
+              // Build result panel (default open)
+              const resultWrap = el('div', 'tool-result open');
+              const inner = el('div', 'tool-result-inner');
+              const pre = el('pre');
+              pre.textContent = fmtResult(evt.result || '');
+              inner.appendChild(pre);
+              resultWrap.appendChild(inner);
+              row.after(resultWrap);
+
+              // Click row to toggle
+              row.onclick = () => {
+                const open = resultWrap.classList.toggle('open');
+                chevron.querySelector('i').setAttribute('data-lucide',
+                  open ? 'chevron-down' : 'chevron-right');
+                safeIcons();
+              };
               safeIcons();
+              scrollBottom();
             }
           }
 
@@ -1197,10 +1246,23 @@ async function send(text) {
 // ══════════════════════════════════
 // HELPERS
 // ══════════════════════════════════
-function setSend(on) { document.getElementById('sendBtn').disabled = !on; }
+function setSend(on) {
+  const btn = document.getElementById('actionBtn');
+  btn.disabled = false;
+  btn.classList.remove('stop-mode');
+  btn.title = 'Send (Enter)';
+  btn.innerHTML = '<i data-lucide="send" style="width:15px;height:15px"></i>';
+  safeIcons();
+}
+
 function setStop(on) {
-  const b = document.getElementById('stopBtn');
-  if (on) b.classList.add('visible'); else b.classList.remove('visible');
+  const btn = document.getElementById('actionBtn');
+  if (on) {
+    btn.classList.add('stop-mode');
+    btn.title = 'Stop generating';
+    btn.innerHTML = '<i data-lucide="square" style="width:13px;height:13px"></i>';
+    safeIcons();
+  }
 }
 
 function autoResize(el) {
