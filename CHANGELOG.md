@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.5.0 (2026-05-31)
+
+### Bug Fixes
+
+- Guard fmtResult against empty input, cancel stream task on client disconnect
+  ([#16](https://github.com/YSMsimon/stock_agent/pull/16),
+  [`e42b334`](https://github.com/YSMsimon/stock_agent/commit/e42b334d84e20485ab40a04d8146c4800ee19001))
+
+### Features
+
+- Expandable tool results and send/stop toggle button
+  ([#16](https://github.com/YSMsimon/stock_agent/pull/16),
+  [`e42b334`](https://github.com/YSMsimon/stock_agent/commit/e42b334d84e20485ab40a04d8146c4800ee19001))
+
+
 ## v1.4.3 (2026-05-30)
 
 ### Bug Fixes
