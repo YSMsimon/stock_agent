@@ -41,15 +41,24 @@ def server():
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    # Wait for startup
-    for _ in range(20):
-        try:
-            import urllib.request
+    # Wait up to 60s for server to become ready (yfinance-mcp takes time in CI)
+    import urllib.request
 
-            urllib.request.urlopen(f"{SERVER_URL}/api/health", timeout=1)
+    ready = False
+    for _ in range(60):
+        if proc.poll() is not None:
+            raise RuntimeError(
+                f"Server process exited early with code {proc.returncode}"
+            )
+        try:
+            urllib.request.urlopen(f"{SERVER_URL}/api/health", timeout=2)
+            ready = True
             break
         except Exception:
-            time.sleep(0.5)
+            time.sleep(1)
+    if not ready:
+        proc.terminate()
+        raise RuntimeError("Server did not become ready within 60s")
     yield proc
     proc.terminate()
     proc.wait()
